@@ -37,9 +37,37 @@ static char *getPlaintext(void) {
 }
 
 static char *encodePlaintext(char *key, char *plaintext) {
-    // map key and plaintext onto 2d array
-    char *ciphertext = malloc(strlen(plaintext));
-    free(ciphertext);
+    size_t length = strlen(plaintext);
+    char *ciphertext = (char*)malloc((length + 1) * sizeof(char));
+    int index;
+
+    if (ciphertext == NULL) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < length; i++) {
+        if (islower(plaintext[i])) {
+            index = plaintext[i] - 'a';
+            ciphertext[i] = key[index];
+            if (isupper(ciphertext[i])) {
+                ciphertext[i] += 32;
+            }
+        }
+        else if (isupper(plaintext[i])) {
+            index = plaintext[i] - 'A';
+            ciphertext[i] = key[index];
+            if (islower(ciphertext[i])) {
+                ciphertext[i] -= 32;
+            }
+        }
+        else {
+            // Preserve non-alphabetic characters in the ciphertext
+            ciphertext[i] = plaintext[i];
+        }
+    }
+    ciphertext[length] = '\0';
+
     return ciphertext;
 }
 
@@ -74,5 +102,8 @@ int main(int argc, char **argv) {
     // encode plaintext
     char *ciphertext = encodePlaintext(key, plaintext);
     
+    printf("%s\n", ciphertext);
+
+    free(ciphertext);
     return 0;
 }
